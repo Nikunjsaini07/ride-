@@ -1,6 +1,6 @@
 // The fixed campus hub. Every ride is either FROM or TO this hub.
 export const HUB = "Shobhit University, Gangoh";
-export const HUB_COORDS = { lat: 29.7806, lng: 77.2629 }; // verified via OSM
+export const HUB_COORDS = { lat: 29.784863, lng: 77.281247 }; // exact — from Google Maps
 
 // Predefined destinations students commonly travel to/from.
 // All coordinates verified via OpenStreetMap Nominatim.
@@ -8,8 +8,8 @@ export const HUB_COORDS = { lat: 29.7806, lng: 77.2629 }; // verified via OSM
 // "order" approximates corridor position for "nearby stops" matching.
 export const DESTINATIONS = [
   // ~0–5 km
-  { name: "Gangoh Bus Stand",   order: 1, lat: 29.7806, lng: 77.2629 },
-  { name: "Gangoh Town",        order: 1, lat: 29.7821, lng: 77.2654 },
+  { name: "Gangoh Bus Stand",   order: 1, lat: 29.7806, lng: 77.2590 },
+  { name: "Gangoh Town",        order: 1, lat: 29.7821, lng: 77.2560 },
 
   // ~9–20 km
   { name: "Nakur",              order: 2, lat: 29.8497, lng: 77.2980 },

@@ -1,0 +1,151 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
+import useMeta, { findDestination } from "../useMeta";
+import RouteMap from "../components/RouteMap.jsx";
+import { useToast } from "../context/ToastContext.jsx";
+
+export default function OfferRide() {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const meta = useMeta();
+  const [form, setForm] = useState({
+    direction: "FROM_HUB",
+    place: "",
+    departureTime: "",
+    note: "",
+  });
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [info, setInfo] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
+  // Reset the chosen route whenever the trip endpoints change.
+  const resetRoute = () => {
+    setSelectedRoute(null);
+    setInfo(null);
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!form.place || !form.departureTime) {
+      setError("Please choose a destination and departure time.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const payload = {
+        ...form,
+        departureTime: new Date(form.departureTime).toISOString(),
+      };
+      if (selectedRoute?.coords?.length) {
+        payload.route = {
+          distance: selectedRoute.distance,
+          duration: selectedRoute.duration,
+          geometry: selectedRoute.coords,
+        };
+      }
+      await api.post("/rides", payload);
+      toast.success("Ride posted!");
+      navigate("/my-rides");
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not create ride.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="auth-wrap">
+      <form className="card auth-card wide" onSubmit={submit}>
+        <h2>Offer a Ride</h2>
+        <p className="muted">You're riding the bike. One pillion seat available.</p>
+        {error && <div className="alert">{error}</div>}
+
+        <label>Direction</label>
+        <select
+          value={form.direction}
+          onChange={(e) => {
+            setForm({ ...form, direction: e.target.value });
+            resetRoute();
+          }}
+        >
+          <option value="FROM_HUB">From University → Destination</option>
+          <option value="TO_HUB">Destination → University</option>
+        </select>
+
+        <label>
+          {form.direction === "FROM_HUB" ? "Going to" : "Coming from"}
+        </label>
+        <select
+          value={form.place}
+          onChange={(e) => {
+            setForm({ ...form, place: e.target.value });
+            resetRoute();
+          }}
+          required
+        >
+          <option value="">Select destination</option>
+          {meta.destinations.map((d) => (
+            <option key={d.name} value={d.name}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+
+        {(() => {
+          const dest = findDestination(meta, form.place);
+          const hub = meta.hubCoords;
+          if (!dest || !hub) return null;
+          const hubPoint = { lat: hub.lat, lng: hub.lng, label: meta.hub };
+          const destPoint = { lat: dest.lat, lng: dest.lng, label: form.place };
+          const mFrom = form.direction === "FROM_HUB" ? hubPoint : destPoint;
+          const mTo = form.direction === "FROM_HUB" ? destPoint : hubPoint;
+          return (
+            <div className="map-preview">
+              {info && (
+                <div className="map-modal-info">
+                  <span>📏 {(info.distance / 1000).toFixed(1)} km</span>
+                  <span>⏱️ ~{Math.round(info.duration / 60)} min by road</span>
+                  {selectedRoute && (
+                    <span className="route-chosen">✓ Route selected</span>
+                  )}
+                </div>
+              )}
+              <RouteMap
+                from={mFrom}
+                to={mTo}
+                height={380}
+                selectable
+                onInfo={setInfo}
+                onSelect={setSelectedRoute}
+              />
+            </div>
+          );
+        })()}
+
+        <label>Departure time</label>
+        <input
+          type="datetime-local"
+          value={form.departureTime}
+          onChange={(e) => setForm({ ...form, departureTime: e.target.value })}
+          required
+        />
+
+        <label>Note (optional)</label>
+        <textarea
+          rows="3"
+          maxLength="280"
+          placeholder="e.g. Leaving from main gate, can wait 5 min"
+          value={form.note}
+          onChange={(e) => setForm({ ...form, note: e.target.value })}
+        />
+
+        <button className="btn btn-primary" disabled={busy}>
+          {busy ? "Posting..." : "Post Ride"}
+        </button>
+      </form>
+    </div>
+  );
+}

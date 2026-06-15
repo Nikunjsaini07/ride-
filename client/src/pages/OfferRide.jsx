@@ -71,8 +71,8 @@ export default function OfferRide() {
             resetRoute();
           }}
         >
-          <option value="FROM_HUB">From University → Destination</option>
-          <option value="TO_HUB">Destination → University</option>
+          <option value="FROM_HUB">Campus → Town</option>
+          <option value="TO_HUB">Town → Campus</option>
         </select>
 
         <label>

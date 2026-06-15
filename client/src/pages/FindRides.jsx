@@ -80,8 +80,8 @@ export default function FindRides() {
               }
             >
               <option value="">Any</option>
-              <option value="FROM_HUB">From University</option>
-              <option value="TO_HUB">To University</option>
+              <option value="FROM_HUB">Campus → Town</option>
+              <option value="TO_HUB">Town → Campus</option>
             </select>
           </div>
           <div>

@@ -14,7 +14,10 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar-inner">
         <Link to="/" className="brand">
-          🛵 SUG <span>RideShare</span>
+          <img src="/sug-logo.png" alt="Shobhit University" className="brand-logo" />
+          <span className="brand-text">
+            SUG <span>RideShare</span>
+          </span>
         </Link>
         <nav className="nav-links">
           <NavLink to="/find">Find a Ride</NavLink>

@@ -5,6 +5,7 @@ import {
   myRides,
   getRide,
   cancelRide,
+  completeRide,
 } from "../controllers/rideController.js";
 import { protect } from "../middleware/auth.js";
 
@@ -15,5 +16,6 @@ router.get("/mine", protect, myRides);
 router.post("/", protect, createRide);
 router.get("/:id", getRide);
 router.delete("/:id", protect, cancelRide);
+router.put("/:id/complete", protect, completeRide);
 
 export default router;

@@ -163,3 +163,34 @@ export const cancelRide = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+// Mark a ride as completed (driver only). This lets both the driver and the
+// passenger rate each other from their profile, even before the scheduled
+// departure time has technically passed.
+export const completeRide = async (req, res) => {
+  try {
+    const ride = await Ride.findById(req.params.id);
+    if (!ride) return res.status(404).json({ message: "Ride not found" });
+    if (ride.driver.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not your ride" });
+    }
+    if (ride.status === "cancelled") {
+      return res
+        .status(400)
+        .json({ message: "Cannot complete a cancelled ride" });
+    }
+    if (ride.status === "completed") {
+      return res.status(400).json({ message: "Ride is already completed" });
+    }
+    if (!ride.passengers || ride.passengers.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Accept a passenger before completing the ride" });
+    }
+    ride.status = "completed";
+    await ride.save();
+    res.json({ message: "Ride marked as completed", ride });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

@@ -42,6 +42,18 @@ export default function MyRides() {
     }
   };
 
+  const completeRide = async (id) => {
+    if (!confirm("Mark this ride as completed? You'll then be able to rate each other."))
+      return;
+    try {
+      await api.put(`/rides/${id}/complete`);
+      toast.success("Ride completed. You can now rate from your profile.");
+      await load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not complete.");
+    }
+  };
+
   const requestsFor = (rideId) =>
     requests.filter((q) => q.ride?._id === rideId && q.status === "pending");
 
@@ -62,6 +74,19 @@ export default function MyRides() {
                 >
                   Cancel ride
                 </button>
+              )}
+              {ride.passengers?.length > 0 &&
+                ride.status !== "completed" &&
+                ride.status !== "cancelled" && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => completeRide(ride._id)}
+                  >
+                    Mark as completed
+                  </button>
+                )}
+              {ride.status === "completed" && (
+                <span className="badge badge-ok">Completed ✓</span>
               )}
               {ride.passengers?.length > 0 && (
                 <div className="passengers">

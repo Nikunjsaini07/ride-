@@ -37,12 +37,12 @@ export const getMyProfile = async (req, res) => {
 
     const decorate = (ride, counterpart) => ({
       _id: ride._id,
-      from: ride.from,
-      to: ride.to,
+      direction: ride.direction,
+      place: ride.place,
       departureTime: ride.departureTime,
       status: ride.status,
       note: ride.note,
-      counterpart, // the other person to rate (or null)
+      counterpart,
       ratedByMe: ratedRideIds.has(ride._id.toString()),
       canRate:
         ride.status !== "cancelled" &&

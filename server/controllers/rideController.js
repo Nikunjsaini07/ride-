@@ -1,22 +1,20 @@
 import Ride from "../models/Ride.js";
 import JoinRequest from "../models/JoinRequest.js";
-import { LOCATION_NAMES, getLocationOrder } from "../config/locations.js";
+import {
+  DESTINATION_NAMES,
+  getDestinationOrder,
+} from "../config/locations.js";
 
 // Create a ride offer (the logged-in user is the driver).
 export const createRide = async (req, res) => {
   try {
-    const { from, to, departureTime, note, route } = req.body;
+    const { direction, place, departureTime, note, route } = req.body;
 
-    if (!LOCATION_NAMES.includes(from)) {
-      return res.status(400).json({ message: "Unknown 'from' location" });
+    if (!["FROM_HUB", "TO_HUB"].includes(direction)) {
+      return res.status(400).json({ message: "Invalid direction" });
     }
-    if (!LOCATION_NAMES.includes(to)) {
-      return res.status(400).json({ message: "Unknown 'to' location" });
-    }
-    if (from === to) {
-      return res
-        .status(400)
-        .json({ message: "'From' and 'to' must be different" });
+    if (!DESTINATION_NAMES.includes(place)) {
+      return res.status(400).json({ message: "Unknown destination" });
     }
     const when = new Date(departureTime);
     if (isNaN(when.getTime())) {
@@ -34,7 +32,6 @@ export const createRide = async (req, res) => {
       safeRoute = {
         distance: Number(route.distance) || null,
         duration: Number(route.duration) || null,
-        // cap stored points to keep documents lean
         geometry: route.geometry
           .filter(
             (p) => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite)
@@ -45,8 +42,8 @@ export const createRide = async (req, res) => {
 
     const ride = await Ride.create({
       driver: req.user._id,
-      from,
-      to,
+      direction,
+      place,
       departureTime: when,
       note: note || "",
       ...(safeRoute ? { route: safeRoute } : {}),
@@ -58,38 +55,17 @@ export const createRide = async (req, res) => {
   }
 };
 
-// Build a place filter that optionally expands to nearby stops along the
-// corridor (locations within one "order" step of the requested place).
-const placeFilter = (name, nearby) => {
-  if (nearby) {
-    const order = getLocationOrder(name);
-    if (order !== null) {
-      const near = LOCATION_NAMES.filter((n) => {
-        const o = getLocationOrder(n);
-        return o !== null && Math.abs(o - order) <= 1;
-      });
-      return { $in: near };
-    }
-  }
-  return name;
-};
-
-// Search open rides. Supports from / to / date filters, plus optional
-// "nearby route" matching so riders see rides heading roughly their way.
+// Search open rides.
 export const searchRides = async (req, res) => {
   try {
-    const { from, to, date, nearby } = req.query;
-    const useNearby = nearby === "true";
+    const { direction, place, date, nearby } = req.query;
     const filter = {
       status: "open",
       departureTime: { $gte: new Date(Date.now() - 60 * 1000) },
     };
 
-    if (from && LOCATION_NAMES.includes(from)) {
-      filter.from = placeFilter(from, useNearby);
-    }
-    if (to && LOCATION_NAMES.includes(to)) {
-      filter.to = placeFilter(to, useNearby);
+    if (direction && ["FROM_HUB", "TO_HUB"].includes(direction)) {
+      filter.direction = direction;
     }
 
     if (date) {
@@ -102,7 +78,19 @@ export const searchRides = async (req, res) => {
       }
     }
 
-    // Pagination for scalability.
+    if (place && DESTINATION_NAMES.includes(place)) {
+      if (nearby === "true") {
+        const order = getDestinationOrder(place);
+        const near = DESTINATION_NAMES.filter((n) => {
+          const o = getDestinationOrder(n);
+          return o !== null && Math.abs(o - order) <= 1;
+        });
+        filter.place = { $in: near };
+      } else {
+        filter.place = place;
+      }
+    }
+
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
@@ -172,9 +160,6 @@ export const cancelRide = async (req, res) => {
   }
 };
 
-// Mark a ride as completed (driver only). This lets both the driver and the
-// passenger rate each other from their profile, even before the scheduled
-// departure time has technically passed.
 export const completeRide = async (req, res) => {
   try {
     const ride = await Ride.findById(req.params.id);
@@ -183,17 +168,13 @@ export const completeRide = async (req, res) => {
       return res.status(403).json({ message: "Not your ride" });
     }
     if (ride.status === "cancelled") {
-      return res
-        .status(400)
-        .json({ message: "Cannot complete a cancelled ride" });
+      return res.status(400).json({ message: "Cannot complete a cancelled ride" });
     }
     if (ride.status === "completed") {
       return res.status(400).json({ message: "Ride is already completed" });
     }
     if (!ride.passengers || ride.passengers.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Accept a passenger before completing the ride" });
+      return res.status(400).json({ message: "Accept a passenger before completing the ride" });
     }
     ride.status = "completed";
     await ride.save();

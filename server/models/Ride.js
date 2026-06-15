@@ -1,18 +1,13 @@
 import mongoose from "mongoose";
 
-// direction:
-//   "FROM_HUB" -> leaving Shobhit University to a destination
-//   "TO_HUB"   -> coming from a destination to Shobhit University
+// A ride goes from one location to another. Either endpoint can be the
+// university or any other town — the campus is no longer a forced endpoint.
 const rideSchema = new mongoose.Schema(
   {
     driver: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    direction: {
-      type: String,
-      enum: ["FROM_HUB", "TO_HUB"],
-      required: true,
-    },
-    // The non-hub endpoint (one of the predefined destinations).
-    place: { type: String, required: true },
+    // Start and end locations (each one of the predefined locations).
+    from: { type: String, required: true },
+    to: { type: String, required: true },
     departureTime: { type: Date, required: true },
     seats: { type: Number, default: 1, min: 1, max: 1 },
     seatsTaken: { type: Number, default: 0 },
@@ -38,8 +33,8 @@ rideSchema.virtual("seatsLeft").get(function () {
 });
 
 // Indexes for the common search & dashboard queries.
-rideSchema.index({ status: 1, direction: 1, departureTime: 1 });
-rideSchema.index({ place: 1, departureTime: 1 });
+rideSchema.index({ status: 1, departureTime: 1 });
+rideSchema.index({ from: 1, to: 1, departureTime: 1 });
 rideSchema.index({ driver: 1, departureTime: -1 });
 
 rideSchema.set("toJSON", { virtuals: true });

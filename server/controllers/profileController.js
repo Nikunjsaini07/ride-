@@ -37,8 +37,8 @@ export const getMyProfile = async (req, res) => {
 
     const decorate = (ride, counterpart) => ({
       _id: ride._id,
-      direction: ride.direction,
-      place: ride.place,
+      from: ride.from,
+      to: ride.to,
       departureTime: ride.departureTime,
       status: ride.status,
       note: ride.note,

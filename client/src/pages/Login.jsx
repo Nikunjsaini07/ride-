@@ -46,6 +46,9 @@ export default function Login() {
           {busy ? "Logging in..." : "Login"}
         </button>
         <p className="auth-alt">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+        <p className="auth-alt">
           New here? <Link to="/register">Create an account</Link>
         </p>
       </form>

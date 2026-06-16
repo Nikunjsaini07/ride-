@@ -41,9 +41,15 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (u) => setUser(u);
 
+  // Apply a session from an existing token + user (e.g. after password reset).
+  const setSession = (u, token) => {
+    if (token) localStorage.setItem("token", token);
+    setUser(u);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, updateUser }}
+      value={{ user, loading, login, register, logout, updateUser, setSession }}
     >
       {children}
     </AuthContext.Provider>

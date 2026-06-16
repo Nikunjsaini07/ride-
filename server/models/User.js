@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema(
     hasBike: { type: Boolean, default: false },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
+    resetTokenHash: { type: String, default: null },
+    resetTokenExpires: { type: Date, default: null },
   },
   { timestamps: true }
 );

@@ -22,6 +22,10 @@ const Protected = ({ children }) => {
 export default function App() {
   return (
     <div className="app-shell">
+      <div className="bg-glows">
+        <div className="bg-glow-1" />
+        <div className="bg-glow-2" />
+      </div>
       <Navbar />
       <main className="container app-main">
         <Routes>

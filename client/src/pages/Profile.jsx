@@ -3,6 +3,8 @@ import api from "../api";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { StarsDisplay, StarsInput } from "../components/StarRating.jsx";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Mail, Phone, Bike, Calendar, MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 const HUB = "Shobhit University, Gangoh";
 
@@ -62,15 +64,22 @@ function HistoryRow({ ride, roleLabel, onRated }) {
     <div className="history-row">
       <div className="history-main">
         <span className="history-route">{routeLabel(ride)}</span>
-        <span className="muted">
-          {roleLabel} · {fmt(ride.departureTime)}
+        <span className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+          <Calendar size={12} />
+          <span>{roleLabel} · {fmt(ride.departureTime)}</span>
         </span>
         {ride.counterpart && (
-          <span className="muted">with {ride.counterpart.name}</span>
+          <span className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+            <User size={12} />
+            <span>with {ride.counterpart.name}</span>
+          </span>
         )}
       </div>
       {ride.ratedByMe ? (
-        <span className="badge badge-ok">Rated ✓</span>
+        <span className="badge badge-ok" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <CheckCircle2 size={12} />
+          <span>Rated</span>
+        </span>
       ) : ride.canRate ? (
         <RateBox ride={ride} onRated={onRated} />
       ) : (
@@ -117,25 +126,35 @@ export default function Profile() {
     }
   };
 
+  const pageVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+  };
+
   return (
-    <div className="profile">
+    <motion.div className="profile" initial="hidden" animate="visible" variants={pageVariants}>
       <div className="card profile-head">
         <div>
           <h2>{user.name}</h2>
-          <p className="muted">{user.email}</p>
-          <StarsDisplay
-            value={data?.stats.ratingAvg ?? user.ratingAvg ?? 0}
-            count={data?.stats.ratingCount ?? user.ratingCount ?? 0}
-          />
+          <p className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Mail size={14} />
+            <span>{user.email}</span>
+          </p>
+          <div style={{ marginTop: '4px' }}>
+            <StarsDisplay
+              value={data?.stats.ratingAvg ?? user.ratingAvg ?? 0}
+              count={data?.stats.ratingCount ?? user.ratingCount ?? 0}
+            />
+          </div>
         </div>
         <div className="profile-stats">
           <div className="stat">
             <span className="stat-num">{data?.stats.offeredCount ?? 0}</span>
-            <span className="stat-label">Rides offered</span>
+            <span className="stat-label">Offered</span>
           </div>
           <div className="stat">
             <span className="stat-num">{data?.stats.joinedCount ?? 0}</span>
-            <span className="stat-label">Rides taken</span>
+            <span className="stat-label">Taken</span>
           </div>
         </div>
       </div>
@@ -155,78 +174,104 @@ export default function Profile() {
         </button>
       </div>
 
-      {tab === "history" && (
-        <div>
-          <h3>Rides I offered</h3>
-          {data?.offered.length ? (
-            data.offered.map((r) => (
-              <HistoryRow
-                key={r._id}
-                ride={r}
-                roleLabel="as driver"
-                onRated={load}
+      <AnimatePresence mode="wait">
+        {tab === "history" ? (
+          <motion.div
+            key="history"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h3>Rides I offered</h3>
+            {data?.offered.length ? (
+              data.offered.map((r) => (
+                <HistoryRow
+                  key={r._id}
+                  ride={r}
+                  roleLabel="as driver"
+                  onRated={load}
+                />
+              ))
+            ) : (
+              <p className="muted" style={{ padding: '10px 0' }}>No past rides offered yet.</p>
+            )}
+
+            <h3>Rides I took</h3>
+            {data?.joined.length ? (
+              data.joined.map((r) => (
+                <HistoryRow
+                  key={r._id}
+                  ride={r}
+                  roleLabel="as passenger"
+                  onRated={load}
+                />
+              ))
+            ) : (
+              <p className="muted" style={{ padding: '10px 0' }}>No past rides taken yet.</p>
+            )}
+
+            <h3>Ratings I received</h3>
+            {data?.received.length ? (
+              data.received.map((rt) => (
+                <div key={rt._id} className="card review">
+                  <StarsDisplay value={rt.stars} />
+                  <span className="muted" style={{ marginLeft: '10px', fontSize: '0.85rem' }}>from {rt.rater?.name}</span>
+                  {rt.comment && <p className="review-text">"{rt.comment}"</p>}
+                </div>
+              ))
+            ) : (
+              <p className="muted" style={{ padding: '10px 0' }}>No ratings yet.</p>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="edit"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <form className="card auth-card" onSubmit={save} style={{ margin: '0 auto' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <User size={14} />
+                <span>Name</span>
+              </label>
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
-            ))
-          ) : (
-            <p className="muted">No past rides offered yet.</p>
-          )}
-
-          <h3>Rides I took</h3>
-          {data?.joined.length ? (
-            data.joined.map((r) => (
-              <HistoryRow
-                key={r._id}
-                ride={r}
-                roleLabel="as passenger"
-                onRated={load}
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={14} />
+                <span>Email</span>
+              </label>
+              <input value={user.email} disabled />
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Phone size={14} />
+                <span>Phone</span>
+              </label>
+              <input
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
-            ))
-          ) : (
-            <p className="muted">No past rides taken yet.</p>
-          )}
-
-          <h3>Ratings I received</h3>
-          {data?.received.length ? (
-            data.received.map((rt) => (
-              <div key={rt._id} className="card review">
-                <StarsDisplay value={rt.stars} />
-                <span className="muted">from {rt.rater?.name}</span>
-                {rt.comment && <p className="review-text">"{rt.comment}"</p>}
-              </div>
-            ))
-          ) : (
-            <p className="muted">No ratings yet.</p>
-          )}
-        </div>
-      )}
-
-      {tab === "edit" && (
-        <form className="card auth-card" onSubmit={save}>
-          <label>Name</label>
-          <input
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <label>Email</label>
-          <input value={user.email} disabled />
-          <label>Phone</label>
-          <input
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={form.hasBike}
-              onChange={(e) => setForm({ ...form, hasBike: e.target.checked })}
-            />
-            I have a bike and can offer rides
-          </label>
-          <button className="btn btn-primary" disabled={busy}>
-            {busy ? "Saving..." : "Save"}
-          </button>
-        </form>
-      )}
-    </div>
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={form.hasBike}
+                  onChange={(e) => setForm({ ...form, hasBike: e.target.checked })}
+                />
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Bike size={15} />
+                  I have a bike and can offer rides
+                </span>
+              </label>
+              <button className="btn btn-primary" disabled={busy}>
+                {busy ? "Saving..." : "Save"}
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

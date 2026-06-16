@@ -4,6 +4,8 @@ import api from "../api";
 import useMeta, { findDestination } from "../useMeta";
 import RouteMap from "../components/RouteMap.jsx";
 import { useToast } from "../context/ToastContext.jsx";
+import { motion } from "framer-motion";
+import { Bike, Navigation, MapPin, Calendar, FileText, CheckCircle2 } from "lucide-react";
 
 export default function OfferRide() {
   const navigate = useNavigate();
@@ -56,14 +58,25 @@ export default function OfferRide() {
     }
   };
 
+  const pageVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+  };
+
   return (
-    <div className="auth-wrap">
+    <motion.div className="auth-wrap" initial="hidden" animate="visible" variants={pageVariants}>
       <form className="card auth-card wide" onSubmit={submit}>
-        <h2>Offer a Ride</h2>
+        <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <Bike size={24} style={{ color: 'var(--primary)' }} />
+          <span>Offer a Ride</span>
+        </h2>
         <p className="muted">You're riding the bike. One pillion seat available.</p>
         {error && <div className="alert">{error}</div>}
 
-        <label>Direction</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Navigation size={14} />
+          <span>Direction</span>
+        </label>
         <select
           value={form.direction}
           onChange={(e) => {
@@ -75,8 +88,9 @@ export default function OfferRide() {
           <option value="TO_HUB">Town → Campus</option>
         </select>
 
-        <label>
-          {form.direction === "FROM_HUB" ? "Going to" : "Coming from"}
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <MapPin size={14} />
+          <span>{form.direction === "FROM_HUB" ? "Going to" : "Coming from"}</span>
         </label>
         <select
           value={form.place}
@@ -105,11 +119,14 @@ export default function OfferRide() {
           return (
             <div className="map-preview">
               {info && (
-                <div className="map-modal-info">
+                <div className="map-modal-info" style={{ marginTop: '0', marginBottom: '12px' }}>
                   <span>📏 {(info.distance / 1000).toFixed(1)} km</span>
                   <span>⏱️ ~{Math.round(info.duration / 60)} min by road</span>
                   {selectedRoute && (
-                    <span className="route-chosen">✓ Route selected</span>
+                    <span className="route-chosen">
+                      <CheckCircle2 size={14} />
+                      <span>Route selected</span>
+                    </span>
                   )}
                 </div>
               )}
@@ -125,7 +142,10 @@ export default function OfferRide() {
           );
         })()}
 
-        <label>Departure time</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Calendar size={14} />
+          <span>Departure time</span>
+        </label>
         <input
           type="datetime-local"
           value={form.departureTime}
@@ -133,7 +153,10 @@ export default function OfferRide() {
           required
         />
 
-        <label>Note (optional)</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <FileText size={14} />
+          <span>Note (optional)</span>
+        </label>
         <textarea
           rows="3"
           maxLength="280"
@@ -146,6 +169,6 @@ export default function OfferRide() {
           {busy ? "Posting..." : "Post Ride"}
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 }

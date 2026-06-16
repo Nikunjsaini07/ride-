@@ -5,6 +5,8 @@ import RideCard from "../components/RideCard.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import useMeta from "../useMeta";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, RotateCcw, Filter, MapPin, Calendar } from "lucide-react";
 
 const emptyFilters = { direction: "", place: "", date: "", nearby: true };
 
@@ -66,13 +68,31 @@ export default function FindRides() {
     setTimeout(() => search(1), 0);
   };
 
+  const pageVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+  };
+
+  const listVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 12 },
+    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+  };
+
   return (
-    <div>
+    <motion.div initial="hidden" animate="visible" variants={pageVariants}>
       <h2>Find a Ride</h2>
       <div className="card filters">
         <div className="filter-grid">
           <div>
-            <label>Direction</label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Filter size={14} />
+              <span>Direction</span>
+            </label>
             <select
               value={filters.direction}
               onChange={(e) =>
@@ -85,7 +105,10 @@ export default function FindRides() {
             </select>
           </div>
           <div>
-            <label>Destination</label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <MapPin size={14} />
+              <span>Destination</span>
+            </label>
             <select
               value={filters.place}
               onChange={(e) => setFilters({ ...filters, place: e.target.value })}
@@ -99,7 +122,10 @@ export default function FindRides() {
             </select>
           </div>
           <div>
-            <label>Date</label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Calendar size={14} />
+              <span>Date</span>
+            </label>
             <input
               type="date"
               value={filters.date}
@@ -121,82 +147,109 @@ export default function FindRides() {
         </div>
         <div className="filter-actions">
           <button className="btn btn-primary" onClick={() => search(1)}>
-            Search
+            <Search size={16} />
+            <span>Search</span>
           </button>
           <button className="btn btn-ghost" onClick={reset}>
-            Reset
+            <RotateCcw size={16} />
+            <span>Reset</span>
           </button>
         </div>
       </div>
 
-      {loading ? (
-        <div className="empty-state">Loading rides…</div>
-      ) : rides.length === 0 ? (
-        <div className="empty-state">
-          <p>No rides match your search.</p>
-          <p className="muted">
-            Try a different date, switch direction, or keep "nearby stops" on.
-          </p>
-          {user && (
-            <button className="btn btn-outline" onClick={() => navigate("/offer")}>
-              Offer a ride instead
-            </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <p className="muted result-count">
-            {pageInfo.total} ride{pageInfo.total !== 1 ? "s" : ""} found
-          </p>
-          <div className="ride-list">
-            {rides.map((ride) => {
-              const isMine = user && ride.driver?._id === user._id;
-              const seatsLeft = ride.seatsLeft ?? ride.seats - ride.seatsTaken;
-              return (
-                <RideCard key={ride._id} ride={ride}>
-                  {isMine ? (
-                    <span className="muted">Your ride</span>
-                  ) : (
-                    <button
-                      className="btn btn-primary"
-                      disabled={seatsLeft <= 0 || joining === ride._id}
-                      onClick={() => join(ride._id)}
-                    >
-                      {seatsLeft <= 0
-                        ? "Full"
-                        : joining === ride._id
-                        ? "Sending…"
-                        : "Request to Join"}
-                    </button>
-                  )}
-                </RideCard>
-              );
-            })}
-          </div>
-
-          {pageInfo.totalPages > 1 && (
-            <div className="pagination">
-              <button
-                className="btn btn-ghost btn-sm"
-                disabled={pageInfo.page <= 1}
-                onClick={() => search(pageInfo.page - 1)}
-              >
-                ← Prev
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            className="ride-list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="card ride-card skeleton-card" />
+            <div className="card ride-card skeleton-card" />
+            <div className="card ride-card skeleton-card" />
+          </motion.div>
+        ) : rides.length === 0 ? (
+          <motion.div
+            key="empty"
+            className="empty-state"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>No rides match your search.</p>
+            <p className="muted">
+              Try a different date, switch direction, or keep "nearby stops" on.
+            </p>
+            {user && (
+              <button className="btn btn-outline" onClick={() => navigate("/offer")}>
+                Offer a ride instead
               </button>
-              <span className="muted">
-                Page {pageInfo.page} of {pageInfo.totalPages}
-              </span>
-              <button
-                className="btn btn-ghost btn-sm"
-                disabled={pageInfo.page >= pageInfo.totalPages}
-                onClick={() => search(pageInfo.page + 1)}
-              >
-                Next →
-              </button>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="results"
+            initial="hidden"
+            animate="visible"
+            variants={listVariants}
+          >
+            <p className="muted result-count">
+              {pageInfo.total} ride{pageInfo.total !== 1 ? "s" : ""} found
+            </p>
+            <div className="ride-list">
+              {rides.map((ride) => {
+                const isMine = user && ride.driver?._id === user._id;
+                const seatsLeft = ride.seatsLeft ?? ride.seats - ride.seatsTaken;
+                return (
+                  <motion.div key={ride._id} variants={cardVariants}>
+                    <RideCard ride={ride}>
+                      {isMine ? (
+                        <span className="muted" style={{ fontWeight: '600', fontSize: '0.9rem' }}>Your ride</span>
+                      ) : (
+                        <button
+                          className="btn btn-primary"
+                          disabled={seatsLeft <= 0 || joining === ride._id}
+                          onClick={() => join(ride._id)}
+                        >
+                          {seatsLeft <= 0
+                            ? "Full"
+                            : joining === ride._id
+                            ? "Sending…"
+                            : "Request to Join"}
+                        </button>
+                      )}
+                    </RideCard>
+                  </motion.div>
+                );
+              })}
             </div>
-          )}
-        </>
-      )}
-    </div>
+
+            {pageInfo.totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  className="btn btn-ghost btn-sm"
+                  disabled={pageInfo.page <= 1}
+                  onClick={() => search(pageInfo.page - 1)}
+                >
+                  ← Prev
+                </button>
+                <span className="muted" style={{ fontWeight: '600' }}>
+                  Page {pageInfo.page} of {pageInfo.totalPages}
+                </span>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  disabled={pageInfo.page >= pageInfo.totalPages}
+                  onClick={() => search(pageInfo.page + 1)}
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

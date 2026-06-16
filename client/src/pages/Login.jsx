@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import PasswordInput from "../components/PasswordInput.jsx";
+import { motion } from "framer-motion";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 export default function Login() {
   const { login } = useAuth();
@@ -24,19 +26,33 @@ export default function Login() {
     }
   };
 
+  const pageVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+  };
+
   return (
-    <div className="auth-wrap">
+    <motion.div className="auth-wrap" initial="hidden" animate="visible" variants={pageVariants}>
       <form className="card auth-card" onSubmit={submit}>
-        <h2>Welcome back</h2>
+        <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <LogIn size={22} style={{ color: 'var(--primary)' }} />
+          <span>Welcome back</span>
+        </h2>
         {error && <div className="alert">{error}</div>}
-        <label>Email</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Mail size={14} />
+          <span>Email</span>
+        </label>
         <input
           type="email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <label>Password</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <Lock size={14} />
+          <span>Password</span>
+        </label>
         <PasswordInput
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -52,6 +68,6 @@ export default function Login() {
           New here? <Link to="/register">Create an account</Link>
         </p>
       </form>
-    </div>
+    </motion.div>
   );
 }

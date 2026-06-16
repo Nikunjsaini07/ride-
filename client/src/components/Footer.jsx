@@ -1,3 +1,5 @@
+import { Bike } from "lucide-react";
+
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
@@ -13,7 +15,10 @@ export default function Footer() {
           </div>
           <p className="footer-tagline">
             SUG RideShare — a student bike ride-sharing platform for Shobhit
-            University, Gangoh. Share rides, save fuel, travel together. 🛵
+            University, Gangoh. Share rides, save fuel, travel together.
+            <span style={{ display: 'block', marginTop: '8px', color: 'var(--primary)', fontWeight: '600' }}>
+              <Bike size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} /> Free student network
+            </span>
           </p>
         </div>
 

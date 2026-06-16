@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
+import { motion } from "framer-motion";
+import { Mail, KeyRound } from "lucide-react";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -22,10 +24,18 @@ export default function ForgotPassword() {
     }
   };
 
+  const pageVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
+  };
+
   return (
-    <div className="auth-wrap">
+    <motion.div className="auth-wrap" initial="hidden" animate="visible" variants={pageVariants}>
       <form className="card auth-card" onSubmit={submit}>
-        <h2>Forgot password</h2>
+        <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <KeyRound size={22} style={{ color: 'var(--primary)' }} />
+          <span>Forgot password</span>
+        </h2>
         {sent ? (
           <>
             <div className="alert info">
@@ -43,7 +53,10 @@ export default function ForgotPassword() {
             <p className="muted">
               Enter your email and we'll send you a link to reset your password.
             </p>
-            <label>Email</label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Mail size={14} />
+              <span>Email</span>
+            </label>
             <input
               type="email"
               value={email}
@@ -59,6 +72,6 @@ export default function ForgotPassword() {
           </>
         )}
       </form>
-    </div>
+    </motion.div>
   );
 }

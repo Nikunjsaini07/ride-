@@ -3,6 +3,7 @@ import useMeta, { findDestination } from "../useMeta";
 import RouteMap from "./RouteMap.jsx";
 import Modal from "./Modal.jsx";
 import { StarsDisplay } from "./StarRating.jsx";
+import { Clock, User, Phone, Bike, Map, Milestone, Navigation, CheckCircle2 } from "lucide-react";
 
 const fmtTime = (iso) =>
   new Date(iso).toLocaleString(undefined, {
@@ -60,9 +61,12 @@ export default function RideCard({ ride, children }) {
         <span className="ride-place">{to}</span>
       </div>
       <div className="ride-meta">
-        <span>🕒 {fmtTime(ride.departureTime)}</span>
+        <span className="ride-meta-item">
+          <Clock size={14} style={{ opacity: 0.8 }} />
+          <span>{fmtTime(ride.departureTime)}</span>
+        </span>
         <span className={`badge ${seatsLeft > 0 ? "badge-ok" : "badge-muted"}`}>
-          {seatsLeft > 0 ? `${seatsLeft} seat left` : "Full"}
+          {seatsLeft > 0 ? `${seatsLeft} seat${seatsLeft !== 1 ? 's' : ''} left` : "Full"}
         </span>
         <span className={`badge badge-status badge-${ride.status}`}>
           {ride.status}
@@ -70,9 +74,22 @@ export default function RideCard({ ride, children }) {
       </div>
       {ride.driver && (
         <div className="ride-driver">
-          👤 {ride.driver.name}
-          {ride.driver.phone ? ` · 📞 ${ride.driver.phone}` : ""}
-          {ride.driver.hasBike ? " · 🛵 has bike" : ""}
+          <span className="ride-meta-item">
+            <User size={14} />
+            <span>{ride.driver.name}</span>
+          </span>
+          {ride.driver.phone && (
+            <span className="ride-meta-item">
+              <Phone size={14} />
+              <span>{ride.driver.phone}</span>
+            </span>
+          )}
+          {ride.driver.hasBike && (
+            <span className="ride-meta-item">
+              <Bike size={14} />
+              <span>has bike</span>
+            </span>
+          )}
           {ride.driver.ratingCount > 0 && (
             <span className="inline-stars">
               <StarsDisplay
@@ -92,7 +109,8 @@ export default function RideCard({ ride, children }) {
             className="link-btn"
             onClick={() => setShowMap(true)}
           >
-            🗺️ Show route
+            <Map size={14} />
+            <span>Show route</span>
           </button>
           <Modal
             open={showMap}
@@ -100,15 +118,27 @@ export default function RideCard({ ride, children }) {
             title={`${from} → ${to}`}
           >
             <div className="map-modal-info">
-              <span>🕒 Departs {fmtTime(ride.departureTime)}</span>
+              <span className="ride-meta-item">
+                <Clock size={14} />
+                <span>Departs {fmtTime(ride.departureTime)}</span>
+              </span>
               {(info || savedRoute) && (
                 <>
-                  <span>📏 {fmtDistance((info || savedRoute).distance)}</span>
-                  <span>⏱️ ~{fmtDuration((info || savedRoute).duration)} by road</span>
+                  <span className="ride-meta-item">
+                    <Milestone size={14} />
+                    <span>{fmtDistance((info || savedRoute).distance)}</span>
+                  </span>
+                  <span className="ride-meta-item">
+                    <Navigation size={14} />
+                    <span>~{fmtDuration((info || savedRoute).duration)} by road</span>
+                  </span>
                 </>
               )}
               {savedRoute && (
-                <span className="route-chosen">✓ Driver's chosen route</span>
+                <span className="route-chosen">
+                  <CheckCircle2 size={14} />
+                  <span>Driver's chosen route</span>
+                </span>
               )}
             </div>
             <RouteMap

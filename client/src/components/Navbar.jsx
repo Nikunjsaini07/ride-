@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { Search, PlusCircle, Calendar, MessageSquare, User, LogOut, LogIn, UserPlus } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -20,22 +21,48 @@ export default function Navbar() {
           </span>
         </Link>
         <nav className="nav-links">
-          <NavLink to="/find">Find a Ride</NavLink>
-          {user && <NavLink to="/offer">Offer a Ride</NavLink>}
-          {user && <NavLink to="/my-rides">My Rides</NavLink>}
-          {user && <NavLink to="/my-requests">My Requests</NavLink>}
+          <NavLink to="/find">
+            <Search size={16} />
+            <span>Find a Ride</span>
+          </NavLink>
+          {user && (
+            <NavLink to="/offer">
+              <PlusCircle size={16} />
+              <span>Offer a Ride</span>
+            </NavLink>
+          )}
+          {user && (
+            <NavLink to="/my-rides">
+              <Calendar size={16} />
+              <span>My Rides</span>
+            </NavLink>
+          )}
+          {user && (
+            <NavLink to="/my-requests">
+              <MessageSquare size={16} />
+              <span>My Requests</span>
+            </NavLink>
+          )}
           {user ? (
             <>
-              <NavLink to="/profile">{user.name}</NavLink>
-              <button className="btn btn-ghost" onClick={handleLogout}>
-                Logout
+              <NavLink to="/profile">
+                <User size={16} />
+                <span>{user.name}</span>
+              </NavLink>
+              <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
+                <LogOut size={14} />
+                <span>Logout</span>
               </button>
             </>
           ) : (
             <>
-              <NavLink to="/login">Login</NavLink>
-              <NavLink to="/register" className="btn btn-primary">
-                Sign Up
+              <NavLink to="/login">
+                <LogIn size={16} />
+                <span>Login</span>
+              </NavLink>
+              <NavLink to="/register" className="btn btn-primary btn-sm" style={{ color: "#fff" }}>
+                <UserPlus size={14} />
+                <span>Sign Up</span>
               </NavLink>
             </>
           )}

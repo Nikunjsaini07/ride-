@@ -58,3 +58,20 @@ export function resetPasswordEmail({ name, resetUrl }) {
     </p>
   </div>`;
 }
+
+export function loginOtpEmail({ name, otp }) {
+  return `
+  <div style="font-family:Segoe UI,Roboto,Arial,sans-serif;max-width:480px;margin:0 auto;color:#1a2438;border:2px solid #000;padding:24px;border-radius:12px;background:#ffffff;box-shadow:4px 4px 0px #000;">
+    <h2 style="color:#10B981;margin-top:0;">RideShare Login Verification</h2>
+    <p>Hi ${name || "there"},</p>
+    <p>Here is your one-time verification code to complete your login. This code is valid for 10 minutes.</p>
+    <div style="text-align:center;margin:32px 0">
+      <span style="font-size:36px;font-weight:800;letter-spacing:6px;background:#f5f3ef;padding:12px 24px;border:2px solid #000;border-radius:8px;box-shadow:4px 4px 0px #000;display:inline-block;color:#000;">
+        ${otp}
+      </span>
+    </div>
+    <p style="font-size:13px;color:#64748b">
+      If you did not request this code, you can safely ignore this email.
+    </p>
+  </div>`;
+}

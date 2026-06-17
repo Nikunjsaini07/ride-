@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
-import { sendEmail, resetPasswordEmail } from "../config/mailer.js";
+import { sendEmail, resetPasswordEmail, loginOtpEmail } from "../config/mailer.js";
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -56,6 +56,60 @@ export const login = async (req, res) => {
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.loginOtp = otp;
+    user.loginOtpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await user.save();
+
+    console.log(`[Verification] Login OTP for ${user.email} is: ${otp}`);
+
+    // Try sending email but don't fail login request if email credentials are not set
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Your RideShare Verification Code",
+        html: loginOtpEmail({ name: user.name, otp }),
+      });
+    } catch (mailErr) {
+      console.warn(`[Verification] Could not send login OTP email to ${user.email}: ${mailErr.message}`);
+    }
+
+    res.json({ otpRequired: true });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+export const verifyLoginOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!user.loginOtp || !user.loginOtpExpires) {
+      return res.status(400).json({ message: "No verification requested or code expired. Please log in again." });
+    }
+    if (new Date() > user.loginOtpExpires) {
+      user.loginOtp = null;
+      user.loginOtpExpires = null;
+      await user.save();
+      return res.status(400).json({ message: "Verification code has expired. Please log in again." });
+    }
+    if (user.loginOtp !== otp) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    // Clear OTP fields
+    user.loginOtp = null;
+    user.loginOtpExpires = null;
+    await user.save();
+
     res.json({ user: sanitize(user), token: signToken(user._id) });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });

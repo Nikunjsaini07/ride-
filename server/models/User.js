@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema(
     ratingCount: { type: Number, default: 0 },
     resetTokenHash: { type: String, default: null },
     resetTokenExpires: { type: Date, default: null },
+    loginOtp: { type: String, default: null },
+    loginOtpExpires: { type: Date, default: null },
   },
   { timestamps: true }
 );

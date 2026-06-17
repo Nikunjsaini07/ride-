@@ -71,9 +71,9 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar-inner">
         <Link to="/" className="brand" onClick={() => setIsOpen(false)}>
-          <img src="/sug-logo.png" alt="Shobhit University" className="brand-logo" />
+          <img src="/sug-logo.png" alt="Logo" className="brand-logo" />
           <span className="brand-text">
-            SUG <span>RideShare</span>
+            <span>Ride</span>Share
           </span>
         </Link>
 

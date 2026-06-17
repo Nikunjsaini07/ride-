@@ -140,7 +140,19 @@ export default function Profile() {
             <Mail size={14} />
             <span>{user.email}</span>
           </p>
-          <div style={{ marginTop: '4px' }}>
+          <p className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+            <Phone size={14} />
+            <span>{user.phone || "No phone number"}</span>
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() => setTab("edit")}
+              style={{ fontSize: '0.82rem', marginLeft: '6px' }}
+            >
+              (change)
+            </button>
+          </p>
+          <div style={{ marginTop: '8px' }}>
             <StarsDisplay
               value={data?.stats.ratingAvg ?? user.ratingAvg ?? 0}
               count={data?.stats.ratingCount ?? user.ratingCount ?? 0}

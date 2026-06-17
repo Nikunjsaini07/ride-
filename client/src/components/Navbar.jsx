@@ -1,9 +1,11 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Search, PlusCircle, Calendar, MessageSquare, User, LogOut, LogIn, UserPlus } from "lucide-react";
+import { useTheme } from "../context/ThemeContext.jsx";
+import { Search, PlusCircle, Calendar, MessageSquare, User, LogOut, LogIn, UserPlus, Sun, Moon } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -66,6 +68,9 @@ export default function Navbar() {
               </NavLink>
             </>
           )}
+          <button className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle Theme" type="button">
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </nav>
       </div>
     </header>

@@ -8,6 +8,10 @@ import {
 // Create a ride offer (the logged-in user is the driver).
 export const createRide = async (req, res) => {
   try {
+    if (!req.user.hasBike) {
+      return res.status(403).json({ message: "Only users with a registered bike can offer rides. Please update your profile." });
+    }
+
     const { direction, place, departureTime, note, route } = req.body;
 
     if (!["FROM_HUB", "TO_HUB"].includes(direction)) {

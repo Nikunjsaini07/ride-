@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
+import { startCleanupJob } from "./config/cleanup.js";
 
 import authRoutes from "./routes/auth.js";
 import rideRoutes from "./routes/rides.js";
@@ -19,6 +20,7 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
 connectDB();
+startCleanupJob();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();

@@ -4,6 +4,7 @@ import api from "../api";
 import useMeta, { findDestination } from "../useMeta";
 import RouteMap from "../components/RouteMap.jsx";
 import { useToast } from "../context/ToastContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { motion } from "framer-motion";
 import { Bike, Navigation, MapPin, Calendar, FileText, CheckCircle2 } from "lucide-react";
 
@@ -11,6 +12,7 @@ export default function OfferRide() {
   const navigate = useNavigate();
   const toast = useToast();
   const meta = useMeta();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     direction: "FROM_HUB",
     place: "",
@@ -62,6 +64,39 @@ export default function OfferRide() {
     hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
   };
+
+  if (!user?.hasBike) {
+    return (
+      <motion.div className="auth-wrap" initial="hidden" animate="visible" variants={pageVariants}>
+        <div className="card auth-card" style={{ textAlign: "center", padding: "40px 24px" }}>
+          <div style={{
+            display: "inline-flex",
+            padding: "16px",
+            borderRadius: "50%",
+            background: "var(--warn-glow)",
+            color: "var(--accent)",
+            marginBottom: "20px",
+            border: "2px solid var(--border)",
+            boxShadow: "2px 2px 0px var(--border)"
+          }}>
+            <Bike size={44} />
+          </div>
+          <h2>Bike Required</h2>
+          <p className="muted" style={{ marginBottom: "24px", maxWidth: "380px", marginLeft: "auto", marginRight: "auto" }}>
+            You haven't registered a bike on your profile yet. Only users with a bike can offer rides to others.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate("/profile")}
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            Go to Profile to Add Bike
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div className="auth-wrap" initial="hidden" animate="visible" variants={pageVariants}>

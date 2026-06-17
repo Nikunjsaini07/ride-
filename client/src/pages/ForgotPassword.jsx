@@ -37,16 +37,32 @@ export default function ForgotPassword() {
           <span>Forgot password</span>
         </h2>
         {sent ? (
-          <>
-            <div className="alert info">
-              If an account exists for <strong>{email}</strong>, a reset link is
-              on its way. Check your inbox (and spam folder). The link expires in
-              1 hour.
+          <div className="auth-success-state" style={{ textAlign: "center", padding: "16px 0 8px" }}>
+            <div className="success-icon-wrap" style={{
+              display: "inline-flex",
+              padding: "16px",
+              borderRadius: "50%",
+              background: "var(--primary-glow)",
+              color: "var(--primary)",
+              marginBottom: "24px",
+              border: "2px solid var(--border)",
+              boxShadow: "2px 2px 0px var(--border)"
+            }}>
+              <Mail size={44} />
             </div>
-            <p className="auth-alt">
-              <Link to="/login">Back to login</Link>
+            <h3 style={{ fontSize: "1.6rem", fontWeight: 800, marginBottom: "12px", color: "var(--text-pure)" }}>
+              Check your email
+            </h3>
+            <p className="muted" style={{ fontSize: "0.95rem", lineHeight: "1.6", marginBottom: "24px" }}>
+              We've sent a password reset link to <strong style={{ color: "var(--text-pure)" }}>{email}</strong>. Please click the link to verify your request.
             </p>
-          </>
+            <div className="alert info" style={{ marginBottom: "24px", textAlign: "left", fontSize: "0.85rem", lineHeight: "1.5" }}>
+              <span>If you don't receive the email within a few minutes, check your spam folder or try requesting a new link.</span>
+            </div>
+            <Link to="/login" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
+              Back to login
+            </Link>
+          </div>
         ) : (
           <>
             {error && <div className="alert">{error}</div>}

@@ -69,8 +69,7 @@ export default function Footer() {
           © {year} SUG RideShare · For Shobhit University students
         </span>
         <span className="footer-dev">
-          Developed by <strong>Nikunj Saini</strong> &amp;{" "}
-          <strong>Aham Saini</strong>
+          Developed by <strong>Nikunj Saini</strong>
         </span>
       </div>
     </footer>

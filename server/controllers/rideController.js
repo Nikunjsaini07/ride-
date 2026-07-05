@@ -78,7 +78,8 @@ export const searchRides = async (req, res) => {
         start.setHours(0, 0, 0, 0);
         const end = new Date(start);
         end.setHours(23, 59, 59, 999);
-        filter.departureTime = { $gte: start, $lte: end };
+        const queryStart = start.getTime() < Date.now() ? new Date(Date.now() - 60 * 1000) : start;
+        filter.departureTime = { $gte: queryStart, $lte: end };
       }
     }
 

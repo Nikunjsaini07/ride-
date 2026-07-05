@@ -13,13 +13,15 @@ export const getMyProfile = async (req, res) => {
   try {
     const meId = req.user._id;
 
-    // Rides I drove that are now in the past.
+    // Rides I drove that are now in the past and were actually taken (had passengers).
     const allDriven = await Ride.find({ driver: meId })
       .populate("passengers", "name phone ratingAvg ratingCount")
       .sort({ departureTime: -1 });
-    const offered = allDriven.filter(isPast);
+    const offered = allDriven.filter(
+      (ride) => isPast(ride) && ride.status !== "cancelled" && ride.passengers?.length > 0
+    );
 
-    // Rides I joined (accepted) that are now in the past.
+    // Rides I joined (accepted) that are now in the past and not cancelled.
     const acceptedReqs = await JoinRequest.find({
       rider: meId,
       status: "accepted",
@@ -29,7 +31,7 @@ export const getMyProfile = async (req, res) => {
     });
     const joined = acceptedReqs
       .map((r) => r.ride)
-      .filter((ride) => ride && isPast(ride));
+      .filter((ride) => ride && isPast(ride) && ride.status !== "cancelled");
 
     // Which rides have I already rated?
     const myRatings = await Rating.find({ rater: meId }).select("ride");

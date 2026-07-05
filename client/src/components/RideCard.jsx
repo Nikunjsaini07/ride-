@@ -5,14 +5,19 @@ import Modal from "./Modal.jsx";
 import { StarsDisplay } from "./StarRating.jsx";
 import { Clock, User, Phone, Bike, Map, Milestone, Navigation, CheckCircle2 } from "lucide-react";
 
-const fmtTime = (iso) =>
-  new Date(iso).toLocaleString(undefined, {
+const fmtTime = (iso) => {
+  const d = new Date(iso);
+  const now = new Date();
+  const showYear = d.getFullYear() !== now.getFullYear();
+  return d.toLocaleString(undefined, {
     weekday: "short",
     day: "numeric",
     month: "short",
+    ...(showYear ? { year: "numeric" } : {}),
     hour: "2-digit",
     minute: "2-digit",
   });
+};
 
 const fmtDistance = (m) => `${(m / 1000).toFixed(1)} km`;
 const fmtDuration = (s) => {

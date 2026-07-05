@@ -199,7 +199,9 @@ export default function FindRides() {
               {pageInfo.total} ride{pageInfo.total !== 1 ? "s" : ""} found
             </p>
             <div className="ride-list">
-              {rides.map((ride) => {
+              {rides
+                .filter((ride) => new Date(ride.departureTime) >= new Date(Date.now() - 5 * 60 * 1000))
+                .map((ride) => {
                 const isMine = user && ride.driver?._id === user._id;
                 const seatsLeft = ride.seatsLeft ?? ride.seats - ride.seatsTaken;
                 return (

@@ -13,13 +13,18 @@ const routeLabel = (ride) => {
   const to = ride.direction === "FROM_HUB" ? ride.place : HUB;
   return `${from} → ${to}`;
 };
-const fmt = (iso) =>
-  new Date(iso).toLocaleString(undefined, {
+const fmt = (iso) => {
+  const d = new Date(iso);
+  const now = new Date();
+  const showYear = d.getFullYear() !== now.getFullYear();
+  return d.toLocaleString(undefined, {
     day: "numeric",
     month: "short",
+    ...(showYear ? { year: "numeric" } : {}),
     hour: "2-digit",
     minute: "2-digit",
   });
+};
 
 function RateBox({ ride, onRated }) {
   const toast = useToast();
